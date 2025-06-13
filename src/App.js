@@ -52,7 +52,7 @@ const HandwritingTemplateGenerator = () => {
     interlineSpacing: 6, // Spacing between baseline and next ascender in mm
     
     // Layout settings - Educational best practices
-    slantAngle: -15, // Default slant angle (negative for leftward slant)
+    slantAngle: 75, // Default slant angle (75° from baseline, typical for calligraphy)
     marginTop: 15, // Optimized for better space usage
     marginBottom: 15, // Consistent margins
     marginLeft: 20, // Adequate space for line labels
@@ -161,9 +161,13 @@ const HandwritingTemplateGenerator = () => {
     const { slantAngle, slantLineSpacing, marginLeft, marginRight, marginTop, marginBottom } = settings;
     const slantLines = [];
     
-    if (slantAngle === 0) return slantLines; // No slant lines for vertical
+    if (slantAngle === 90) return slantLines; // No slant lines for vertical (90° from baseline)
     
-    const angleRad = (slantAngle * Math.PI) / 180;
+    // Convert slant angle to be relative to baseline (horizontal) instead of vertical
+    // In calligraphy, 0° = horizontal, 90° = vertical
+    // We need to convert this to the angle from vertical for Math.tan
+    const angleFromVertical = 90 - slantAngle;
+    const angleRad = (angleFromVertical * Math.PI) / 180;
     const tanAngle = Math.tan(angleRad);
     
     // Define the writing area boundaries
@@ -507,12 +511,12 @@ const HandwritingTemplateGenerator = () => {
                 {preset}
               </button>
             ))}
-            {label === 'Slant Angle' && [-15, 0, 15, 20].map(preset => (
+            {label === 'Slant Angle' && [55, 75, 85, 90].map(preset => (
               <button
                 key={preset}
                 onClick={() => onChange(preset)}
                 className={`brutalist-preset-btn ${value === preset ? 'active' : ''}`}
-                title={`Set to ${preset}°`}
+                title={`Set to ${preset}° from baseline`}
               >
                 {preset}°
               </button>
@@ -653,8 +657,8 @@ const HandwritingTemplateGenerator = () => {
               label="Slant Angle"
               value={settings.slantAngle}
               onChange={(value) => updateSetting('slantAngle', value)}
-              min={-45}
-              max={45}
+              min={45}
+              max={135}
               step={0.5}
               unit="°"
             />
@@ -1007,7 +1011,7 @@ const HandwritingTemplateGenerator = () => {
                     <>
                       <line x1="25" y1="7" x2="29" y2="7" stroke={settings.slantLineColor} strokeWidth="0.2"/>
                       <text x="31" y="8" fontSize="1" fill="#333" fontFamily="ArkSans">
-                        Slant {settings.slantAngle}°
+                        Slant {settings.slantAngle}° from baseline
                       </text>
                     </>
                   )}

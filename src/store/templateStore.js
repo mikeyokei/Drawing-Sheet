@@ -17,7 +17,7 @@ export const TYPOGRAPHY_PRESETS = {
     capHeight: 0.7,
     ascender: 0.75,
     descender: 0.25,
-    slantAngle: 7,
+    slantAngle: 83,  // 83° from baseline (was 7° from vertical)
     lineSpacing: 2.5,        // Inter-line spacing (baseline to baseline)
     metricSpacing: 1.0,      // Internal spacing between typography elements
   },
@@ -27,7 +27,7 @@ export const TYPOGRAPHY_PRESETS = {
     capHeight: 0.66,
     ascender: 1.0,
     descender: 0.33,
-    slantAngle: 12,
+    slantAngle: 78,  // 78° from baseline (was 12° from vertical)
     lineSpacing: 3.0,
     metricSpacing: 1.2,      // Tighter internal spacing for elegant look
   },
@@ -37,7 +37,7 @@ export const TYPOGRAPHY_PRESETS = {
     capHeight: 0.6,
     ascender: 0.8,
     descender: 0.3,
-    slantAngle: 20,
+    slantAngle: 70,  // 70° from baseline (was 20° from vertical)
     lineSpacing: 2.8,
     metricSpacing: 1.1,
   },
@@ -47,7 +47,7 @@ export const TYPOGRAPHY_PRESETS = {
     capHeight: 0.65,
     ascender: 0.85,
     descender: 0.35,
-    slantAngle: 15,
+    slantAngle: 75,  // 75° from baseline (was 15° from vertical)
     lineSpacing: 3.2,
     metricSpacing: 1.3,      // More generous spacing for modern style
   },
@@ -57,7 +57,7 @@ export const TYPOGRAPHY_PRESETS = {
     capHeight: 0.7,
     ascender: 0.75,
     descender: 0.25,
-    slantAngle: 7,
+    slantAngle: 83,  // 83° from baseline (was 7° from vertical)
     lineSpacing: 2.0,
     metricSpacing: 1.0,      // Standard 1:1 spacing
   },

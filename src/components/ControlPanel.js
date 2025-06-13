@@ -163,8 +163,8 @@ const ControlPanel = ({ onExportPDF }) => {
           label="Slant Angle"
           value={metrics.slantAngle}
           onChange={(value) => setMetric('slantAngle', value)}
-          min={-45}
-          max={45}
+          min={45}
+          max={135}
           step={0.5}
           unit="°"
         />

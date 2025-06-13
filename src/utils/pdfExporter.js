@@ -149,9 +149,12 @@ export class PDFExporter {
   drawHighResSlantLines(ctx, workArea, metrics, mmToPixel) {
     const slantAngle = metrics.slantAngle;
     
-    if (slantAngle === 0) return;
+    if (slantAngle === 90) return; // No slant lines for vertical (90° from baseline)
     
-    const radians = (slantAngle * Math.PI) / 180;
+    // Convert slant angle to be relative to baseline (horizontal) instead of vertical
+    // In calligraphy, 0° = horizontal, 90° = vertical
+    const angleFromVertical = 90 - slantAngle;
+    const radians = (angleFromVertical * Math.PI) / 180;
     const slantSpacing = mmToPixel(3); // 3mm spacing between diagonal lines
     
     // Calculate how many lines we need to fill the entire width plus the offset
