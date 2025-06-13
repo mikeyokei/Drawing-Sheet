@@ -356,8 +356,13 @@ const HandwritingTemplateGenerator = () => {
   const { verticalLines, horizontalLines } = generateGridLines();
   const marginGuides = generateMarginGuides();
 
-  // Enhanced tap-friendly stepper component
+  // Enhanced tap-friendly stepper component with refined UX
   const BrutalistStepper = ({ label, value, onChange, min, max, step, unit = '' }) => {
+    const [isPressed, setIsPressed] = React.useState({ dec: false, inc: false });
+    const [inputFocused, setInputFocused] = React.useState(false);
+    const intervalRef = React.useRef(null);
+    const timeoutRef = React.useRef(null);
+
     const handleDecrement = () => {
       const newValue = Math.max(min, value - step);
       onChange(newValue);
@@ -375,37 +380,145 @@ const HandwritingTemplateGenerator = () => {
       }
     };
 
+    // Enhanced button press with hold-to-repeat functionality
+    const handleButtonPress = (direction, isMouseDown) => {
+      if (isMouseDown) {
+        setIsPressed(prev => ({ ...prev, [direction]: true }));
+        
+        // Immediate action
+        const action = direction === 'inc' ? handleIncrement : handleDecrement;
+        action();
+        
+        // Start repeat after delay
+        timeoutRef.current = setTimeout(() => {
+          intervalRef.current = setInterval(() => {
+            action();
+          }, 80); // Fast repeat rate
+        }, 400); // Initial delay before repeat starts
+      } else {
+        setIsPressed(prev => ({ ...prev, [direction]: false }));
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        if (intervalRef.current) clearInterval(intervalRef.current);
+      }
+    };
+
+    // Keyboard navigation support
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleIncrement();
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleDecrement();
+      }
+    };
+
+    // Cleanup on unmount
+    React.useEffect(() => {
+      return () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        if (intervalRef.current) clearInterval(intervalRef.current);
+      };
+    }, []);
+
+    // Calculate percentage for visual feedback
+    const percentage = ((value - min) / (max - min)) * 100;
+
     return (
       <div className="brutalist-stepper-container">
         <div className="brutalist-stepper-label">
           <span className="brutalist-label">{label}</span>
-          <span className="brutalist-stepper-value brutalist-mono">{value}{unit}</span>
+          <div className="brutalist-stepper-value-container">
+            <span className="brutalist-stepper-value brutalist-mono">{value}{unit}</span>
+            <div className="brutalist-stepper-range-indicator">
+              <div 
+                className="brutalist-stepper-range-fill" 
+                style={{ width: `${percentage}%` }}
+              ></div>
+            </div>
+          </div>
         </div>
         <div className="brutalist-stepper-controls">
           <button 
-            className="brutalist-stepper-btn" 
-            onClick={handleDecrement}
+            className={`brutalist-stepper-btn ${isPressed.dec ? 'pressed' : ''}`}
+            onMouseDown={() => handleButtonPress('dec', true)}
+            onMouseUp={() => handleButtonPress('dec', false)}
+            onMouseLeave={() => handleButtonPress('dec', false)}
+            onTouchStart={() => handleButtonPress('dec', true)}
+            onTouchEnd={() => handleButtonPress('dec', false)}
             disabled={value <= min}
+            title={`Decrease ${label} (${step}${unit})`}
+            aria-label={`Decrease ${label}`}
           >
-            −
+            <span className="brutalist-stepper-btn-icon">−</span>
           </button>
-          <input
-            type="number"
-            value={value}
-            onChange={handleInputChange}
-            min={min}
-            max={max}
-            step={step}
-            className="brutalist-stepper-input"
-          />
+          <div className="brutalist-stepper-input-container">
+            <input
+              type="number"
+              value={value}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
+              min={min}
+              max={max}
+              step={step}
+              className={`brutalist-stepper-input ${inputFocused ? 'focused' : ''}`}
+              title={`${label}: ${min} to ${max}${unit}`}
+              aria-label={`${label} value`}
+            />
+            <div className="brutalist-stepper-input-overlay"></div>
+          </div>
           <button 
-            className="brutalist-stepper-btn" 
-            onClick={handleIncrement}
+            className={`brutalist-stepper-btn ${isPressed.inc ? 'pressed' : ''}`}
+            onMouseDown={() => handleButtonPress('inc', true)}
+            onMouseUp={() => handleButtonPress('inc', false)}
+            onMouseLeave={() => handleButtonPress('inc', false)}
+            onTouchStart={() => handleButtonPress('inc', true)}
+            onTouchEnd={() => handleButtonPress('inc', false)}
             disabled={value >= max}
+            title={`Increase ${label} (${step}${unit})`}
+            aria-label={`Increase ${label}`}
           >
-            +
+            <span className="brutalist-stepper-btn-icon">+</span>
           </button>
         </div>
+        
+        {/* Quick preset buttons for common values */}
+        {(label === 'Number of Lines' || label === 'X-Height' || label === 'Slant Angle') && (
+          <div className="brutalist-stepper-presets">
+            {label === 'Number of Lines' && [8, 12, 16, 20].map(preset => (
+              <button
+                key={preset}
+                onClick={() => onChange(preset)}
+                className={`brutalist-preset-btn ${value === preset ? 'active' : ''}`}
+                title={`Set to ${preset} lines`}
+              >
+                {preset}
+              </button>
+            ))}
+            {label === 'X-Height' && [3, 4, 5, 6].map(preset => (
+              <button
+                key={preset}
+                onClick={() => onChange(preset)}
+                className={`brutalist-preset-btn ${value === preset ? 'active' : ''}`}
+                title={`Set to ${preset}mm`}
+              >
+                {preset}
+              </button>
+            ))}
+            {label === 'Slant Angle' && [-15, 0, 15, 20].map(preset => (
+              <button
+                key={preset}
+                onClick={() => onChange(preset)}
+                className={`brutalist-preset-btn ${value === preset ? 'active' : ''}`}
+                title={`Set to ${preset}°`}
+              >
+                {preset}°
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
