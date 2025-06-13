@@ -1,0 +1,617 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global Font Override - Force ArkSans everywhere */
+* {
+  font-family: 'ArkSans' !important;
+}
+
+/* Custom Font Import */
+@font-face {
+  font-family: 'ArkSans';
+  src: url('https://res.cloudinary.com/djyhapimn/raw/upload/v1749662957/ArkSans-Regular_xds8qr.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Brutalist Design System */
+:root {
+  --black: #000000;
+  --white: #ffffff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e5e5e5;
+  --gray-300: #d4d4d4;
+  --gray-800: #262626;
+  --accent: #008080;
+  --accent-hover: #006666;
+  
+  /* Handwriting Practice Colors - Research-Based */
+  --baseline-color: #000000;
+  --midline-color: #0066cc;
+  --topline-color: #0066cc;
+  --slant-color: #ff6600;
+  --margin-color: #ff0000;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'ArkSans';
+  font-weight: 500;
+  background: var(--gray-50);
+  color: var(--black);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+.brutalist-title {
+  font-family: 'ArkSans';
+  font-weight: 900;
+  font-size: 1.5rem;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  color: var(--black);
+  text-transform: uppercase;
+}
+
+.brutalist-section-title {
+  font-family: 'ArkSans';
+  font-weight: 800;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--black);
+  margin: 0;
+}
+
+.brutalist-label {
+  font-family: 'ArkSans';
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  color: var(--gray-800);
+}
+
+.brutalist-mono {
+  font-family: 'ArkSans';
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* Layout */
+.brutalist-container {
+  display: flex;
+  min-height: 100vh;
+  background: var(--gray-50);
+}
+
+.brutalist-panel {
+  width: 280px;
+  background: var(--white);
+  border-right: 3px solid var(--black);
+  padding: 0;
+  overflow-y: auto;
+  position: relative;
+}
+
+.brutalist-panel::after {
+  display: none;
+}
+
+.brutalist-canvas-area {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: var(--gray-50);
+  min-height: 100vh;
+  overflow: auto;
+}
+
+/* Panel Sections */
+.brutalist-section {
+  border-bottom: 2px solid var(--black);
+  padding: 1rem;
+  background: var(--white);
+}
+
+.brutalist-section:last-child {
+  border-bottom: none;
+}
+
+.brutalist-section.accent {
+  background: var(--black);
+  color: var(--white);
+}
+
+.brutalist-section.accent .brutalist-section-title,
+.brutalist-section.accent .brutalist-label {
+  color: var(--white);
+}
+
+/* Controls */
+.brutalist-preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.brutalist-btn {
+  font-family: 'ArkSans';
+  background: var(--white);
+  border: 2px solid var(--black);
+  color: var(--black);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  position: relative;
+}
+
+.brutalist-btn:hover {
+  background: var(--black);
+  color: var(--white);
+  transform: translate(-2px, -2px);
+  box-shadow: 2px 2px 0 var(--black);
+}
+
+.brutalist-btn.active {
+  background: var(--black);
+  color: var(--white);
+  transform: translate(-2px, -2px);
+  box-shadow: 2px 2px 0 var(--accent);
+}
+
+.brutalist-btn-accent {
+  font-family: 'ArkSans';
+  background: var(--accent);
+  border: 2px solid var(--black);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.brutalist-btn-accent:hover {
+  background: var(--accent-hover);
+  transform: translate(-2px, -2px);
+  box-shadow: 2px 2px 0 var(--black);
+}
+
+/* Steppers */
+.brutalist-stepper-container {
+  margin: 0.75rem 0;
+}
+
+/* Compact dual stepper layout */
+.brutalist-dual-stepper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+}
+
+.brutalist-dual-stepper .brutalist-stepper-container {
+  margin: 0;
+}
+
+.brutalist-stepper-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.brutalist-stepper-value {
+  font-family: 'ArkSans';
+  font-weight: 700;
+  font-size: 0.75rem;
+  background: var(--black);
+  color: var(--white);
+  padding: 0.25rem 0.5rem;
+  letter-spacing: -0.025em;
+  transition: all 0.2s ease;
+}
+
+.brutalist-stepper-controls {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 2px solid var(--black);
+}
+
+.brutalist-stepper-btn {
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  width: 32px;
+  height: 32px;
+  font-family: 'ArkSans';
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brutalist-stepper-btn:hover:not(:disabled) {
+  background: var(--accent);
+  transform: translate(-1px, -1px);
+  box-shadow: 1px 1px 0 var(--black);
+}
+
+.brutalist-stepper-btn:active:not(:disabled) {
+  transform: translate(0, 0);
+  box-shadow: none;
+  background: var(--accent-hover);
+}
+
+.brutalist-stepper-btn:disabled {
+  background: var(--gray-400);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.brutalist-stepper-input {
+  border: none;
+  background: var(--white);
+  color: var(--black);
+  font-family: 'ArkSans';
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-align: center;
+  width: 60px;
+  height: 32px;
+  outline: none;
+  border-left: 1px solid var(--black);
+  border-right: 1px solid var(--black);
+}
+
+.brutalist-stepper-input:focus {
+  background: var(--gray-100);
+}
+
+.brutalist-slider {
+  width: 100%;
+  height: 12px;
+  background: var(--gray-200);
+  border: 2px solid var(--black);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
+  transition: all 0.2s ease;
+  position: relative;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.brutalist-slider:hover {
+  background: var(--gray-300);
+  transform: translate(-1px, -1px);
+  box-shadow: 1px 1px 0 var(--black);
+}
+
+.brutalist-slider:focus {
+  background: var(--gray-300);
+  transform: translate(-2px, -2px);
+  box-shadow: 2px 2px 0 var(--black);
+}
+
+.brutalist-slider:active {
+  transform: translate(0, 0);
+  box-shadow: none;
+}
+
+.brutalist-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  background: var(--black);
+  border: 3px solid var(--white);
+  cursor: grab;
+  box-shadow: 0 0 0 2px var(--black);
+  border-radius: 0;
+  transition: all 0.15s ease;
+  position: relative;
+  pointer-events: auto;
+}
+
+.brutalist-slider::-webkit-slider-thumb:hover {
+  background: var(--accent);
+  transform: scale(1.1);
+}
+
+.brutalist-slider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+  background: var(--accent-hover);
+}
+
+.brutalist-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  background: var(--black);
+  border: 3px solid var(--white);
+  cursor: grab;
+  box-shadow: 0 0 0 2px var(--black);
+  border-radius: 0;
+  transition: all 0.15s ease;
+  pointer-events: auto;
+}
+
+.brutalist-slider::-moz-range-thumb:hover {
+  background: var(--accent);
+  transform: scale(1.1);
+}
+
+.brutalist-slider::-moz-range-thumb:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+  background: var(--accent-hover);
+}
+
+.brutalist-slider::-webkit-slider-track {
+  height: 8px;
+  background: transparent;
+  border: none;
+}
+
+.brutalist-slider::-moz-range-track {
+  height: 8px;
+  background: transparent;
+  border: none;
+}
+
+/* Checkboxes */
+.brutalist-checkbox-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* Compact checkbox grid layout */
+.brutalist-checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.brutalist-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.brutalist-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--black);
+  background: var(--white);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.brutalist-checkbox input[type="checkbox"] {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.brutalist-checkbox input[type="checkbox"]:checked + .brutalist-checkbox-mark {
+  display: block;
+}
+
+.brutalist-checkbox-mark {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: var(--black);
+}
+
+.brutalist-checkbox-label {
+  font-family: 'ArkSans';
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Input Components */
+.brutalist-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.brutalist-input {
+  font-family: 'ArkSans';
+  font-weight: 600;
+  font-size: 0.875rem;
+  background: var(--white);
+  border: 2px solid var(--black);
+  color: var(--black);
+  padding: 0.75rem;
+  transition: all 0.1s ease;
+  outline: none;
+}
+
+.brutalist-input:focus {
+  background: var(--gray-50);
+  transform: translate(-2px, -2px);
+  box-shadow: 2px 2px 0 var(--black);
+}
+
+.brutalist-input:hover {
+  background: var(--gray-50);
+}
+
+/* Canvas */
+.brutalist-canvas {
+  background: var(--white);
+  border: 2px solid var(--black);
+  position: relative;
+}
+
+.brutalist-canvas svg {
+  display: block;
+  font-family: 'ArkSans';
+}
+
+/* Enhanced Handwriting Practice Sheet Styles */
+.practice-sheet-text {
+  font-family: 'ArkSans';
+  font-weight: 500;
+}
+
+.practice-sheet-labels {
+  font-family: 'ArkSans';
+  font-weight: 700;
+  font-size: 3px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .brutalist-container {
+    flex-direction: column;
+  }
+  
+  .brutalist-panel {
+    width: 100%;
+    border-right: none;
+    border-bottom: 3px solid var(--black);
+  }
+  
+  .brutalist-panel::after {
+    display: none;
+  }
+  
+  .brutalist-canvas-area {
+    padding: 0.25rem;
+    min-height: auto;
+  }
+  
+  .brutalist-canvas {
+    max-height: calc(100vh - 200px);
+    box-shadow: 4px 4px 0 var(--black);
+  }
+}
+
+@media print {
+  body {
+    background: white !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Enhanced Slider Styles for Tailwind Components */
+.slider-track {
+  background: #e5e7eb !important;
+  border: 2px solid #000 !important;
+  border-radius: 0 !important;
+  transition: all 0.2s ease !important;
+  height: 12px !important;
+}
+
+.slider-track:hover {
+  background: #d1d5db !important;
+  transform: translate(-1px, -1px) !important;
+  box-shadow: 1px 1px 0 #000 !important;
+}
+
+.slider-track:focus {
+  background: #d1d5db !important;
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  outline: none !important;
+}
+
+.slider-track:active {
+  transform: translate(0, 0) !important;
+  box-shadow: none !important;
+}
+
+.slider-track::-webkit-slider-thumb {
+  appearance: none !important;
+  width: 24px !important;
+  height: 24px !important;
+  background: #000 !important;
+  border: 3px solid #fff !important;
+  cursor: grab !important;
+  box-shadow: 0 0 0 2px #000 !important;
+  border-radius: 0 !important;
+  transition: all 0.15s ease !important;
+}
+
+.slider-track::-webkit-slider-thumb:hover {
+  background: #3b82f6 !important;
+  transform: scale(1.1) !important;
+}
+
+.slider-track::-webkit-slider-thumb:active {
+  cursor: grabbing !important;
+  transform: scale(0.95) !important;
+  background: #1d4ed8 !important;
+}
+
+.slider-track::-moz-range-thumb {
+  width: 24px !important;
+  height: 24px !important;
+  background: #000 !important;
+  border: 3px solid #fff !important;
+  cursor: grab !important;
+  box-shadow: 0 0 0 2px #000 !important;
+  border-radius: 0 !important;
+  transition: all 0.15s ease !important;
+}
+
+.slider-track::-moz-range-thumb:hover {
+  background: #3b82f6 !important;
+  transform: scale(1.1) !important;
+}
+
+.slider-track::-moz-range-thumb:active {
+  cursor: grabbing !important;
+  transform: scale(0.95) !important;
+  background: #1d4ed8 !important;
+} 
