@@ -8,6 +8,10 @@ const HandwritingTemplateGenerator = () => {
   const DEFAULT_HEIGHT = 297;
   const SCALE_FACTOR = 2.8; // Scale for screen display
   
+  // State for mobile responsive behavior
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 480);
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+  
   // State for page settings
   const [pageSettings, setPageSettings] = useState({
     orientation: 'portrait', // 'portrait' or 'landscape'
@@ -52,12 +56,12 @@ const HandwritingTemplateGenerator = () => {
     numberOfLines: 12, // More rows to reduce spacing between them
     interlineSpacing: 6, // Spacing between row groups (each row contains ascender + baseline + descender)
     
-    // Layout settings - Educational best practices
+    // Layout settings - A4 standard printing margins
     slantAngle: 75, // Default slant angle (75° from baseline, typical for calligraphy)
-    marginTop: 15, // Optimized for better space usage
-    marginBottom: 15, // Consistent margins
-    marginLeft: 20, // Adequate space for line labels
-    marginRight: 15, // Optimized right margin
+    marginTop: 25, // Standard A4 top margin (25mm)
+    marginBottom: 25, // Standard A4 bottom margin (25mm)
+    marginLeft: 25, // Standard A4 left margin (25mm)
+    marginRight: 20, // Standard A4 right margin (20mm)
     
     // Grid options - Research-informed settings (showing all 4 main lines by default)
     showSlantLines: true,
@@ -85,6 +89,45 @@ const HandwritingTemplateGenerator = () => {
   });
 
   const svgRef = useRef();
+
+  // Handle window resize for mobile detection
+  React.useEffect(() => {
+    const handleResize = () => {
+      const newIsMobile = window.innerWidth <= 480;
+      setIsMobile(newIsMobile);
+      // Auto-expand panel when switching from mobile to desktop
+      if (!newIsMobile && isPanelCollapsed) {
+        setIsPanelCollapsed(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isPanelCollapsed]);
+
+  // Toggle mobile panel visibility
+  const toggleMobilePanel = () => {
+    setIsPanelCollapsed(!isPanelCollapsed);
+  };
+
+  // Margin presets for different use cases
+  const marginPresets = {
+    standard: { top: 25, bottom: 25, left: 25, right: 20, name: "Standard A4" },
+    minimal: { top: 15, bottom: 15, left: 15, right: 15, name: "Minimal" },
+    wide: { top: 30, bottom: 30, left: 30, right: 25, name: "Wide Margins" },
+    notebook: { top: 20, bottom: 20, left: 30, right: 15, name: "Notebook Style" }
+  };
+
+  // Apply margin preset
+  const applyMarginPreset = (preset) => {
+    setSettings(prev => ({
+      ...prev,
+      marginTop: preset.top,
+      marginBottom: preset.bottom,
+      marginLeft: preset.left,
+      marginRight: preset.right
+    }));
+  };
 
   // Update settings
   const updateSetting = (key, value) => {
@@ -597,13 +640,37 @@ const HandwritingTemplateGenerator = () => {
   return (
     <div className="brutalist-container">
       {/* Control Panel */}
-      <div className="brutalist-panel no-print">
+      <div className={`brutalist-panel no-print ${isMobile && isPanelCollapsed ? 'mobile-collapsed' : ''}`}>
         {/* Header */}
         <div className="brutalist-section accent">
-          <h1 className="brutalist-title">Practice<br/>Sheet<br/>Generator</h1>
-          <p className="brutalist-mono" style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: 0.8 }}>
-            HANDWRITING · A4 · EDUCATION
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <h1 className="brutalist-title">Practice<br/>Sheet<br/>Generator</h1>
+              <p className="brutalist-mono" style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: 0.8 }}>
+                HANDWRITING · A4 · EDUCATION
+              </p>
+            </div>
+            {isMobile && (
+              <button
+                onClick={toggleMobilePanel}
+                className="brutalist-btn mobile-toggle-btn"
+                style={{ 
+                  minWidth: '44px',
+                  minHeight: '44px',
+                  padding: '8px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  color: 'white',
+                  marginTop: '4px',
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold'
+                }}
+                aria-label={isPanelCollapsed ? 'Show controls' : 'Hide controls'}
+              >
+                {isPanelCollapsed ? '☰' : '✕'}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Page Settings */}
@@ -665,6 +732,78 @@ const HandwritingTemplateGenerator = () => {
           <div className="brutalist-mono" style={{ fontSize: '0.7rem', marginTop: '0.5rem', opacity: 0.7 }}>
             Current: {CURRENT_WIDTH} × {CURRENT_HEIGHT} mm
             {!pageSettings.customSize && ` (A4 ${pageSettings.orientation})`}
+          </div>
+        </div>
+
+        {/* Margin Presets */}
+        <div className="brutalist-section">
+          <h3 className="brutalist-section-title">Page Margins</h3>
+          
+          <div className="brutalist-preset-grid">
+            {Object.entries(marginPresets).map(([key, preset]) => (
+              <button
+                key={key}
+                onClick={() => applyMarginPreset(preset)}
+                className={`brutalist-preset-btn ${
+                  settings.marginTop === preset.top && 
+                  settings.marginBottom === preset.bottom && 
+                  settings.marginLeft === preset.left && 
+                  settings.marginRight === preset.right ? 'active' : ''
+                }`}
+              >
+                {preset.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Current margin display */}
+          <div className="brutalist-mono" style={{ fontSize: '0.6rem', marginTop: '0.5rem', opacity: 0.7 }}>
+            T:{settings.marginTop} B:{settings.marginBottom} L:{settings.marginLeft} R:{settings.marginRight}mm
+          </div>
+
+          {/* Fine-tune margins */}
+          <div style={{ marginTop: '1rem' }}>
+            <div className="brutalist-dual-stepper">
+              <BrutalistStepper
+                label="Top Margin"
+                value={settings.marginTop}
+                onChange={(value) => updateSetting('marginTop', value)}
+                min={5}
+                max={50}
+                step={1}
+                unit="mm"
+              />
+              <BrutalistStepper
+                label="Bottom Margin"
+                value={settings.marginBottom}
+                onChange={(value) => updateSetting('marginBottom', value)}
+                min={5}
+                max={50}
+                step={1}
+                unit="mm"
+              />
+            </div>
+            
+            <div className="brutalist-dual-stepper">
+              <BrutalistStepper
+                label="Left Margin"
+                value={settings.marginLeft}
+                onChange={(value) => updateSetting('marginLeft', value)}
+                min={5}
+                max={50}
+                step={1}
+                unit="mm"
+              />
+              <BrutalistStepper
+                label="Right Margin"
+                value={settings.marginRight}
+                onChange={(value) => updateSetting('marginRight', value)}
+                min={5}
+                max={50}
+                step={1}
+                unit="mm"
+              />
+            </div>
           </div>
         </div>
 
@@ -807,7 +946,7 @@ const HandwritingTemplateGenerator = () => {
       </div>
 
       {/* Preview Area */}
-      <div className="brutalist-canvas-area">
+      <div className={`brutalist-canvas-area ${isMobile && isPanelCollapsed ? 'panel-collapsed' : ''}`}>
         <div 
           className="brutalist-canvas" 
           style={{ width: CURRENT_WIDTH * SCALE_FACTOR, height: CURRENT_HEIGHT * SCALE_FACTOR }}
@@ -819,15 +958,15 @@ const HandwritingTemplateGenerator = () => {
             viewBox={`0 0 ${CURRENT_WIDTH} ${CURRENT_HEIGHT}`}
             className="practice-sheet-text"
           >
-            {/* Page background */}
-            <rect width={CURRENT_WIDTH} height={CURRENT_HEIGHT} fill="white" />
+            {/* Page background with border */}
+            <rect width={CURRENT_WIDTH} height={CURRENT_HEIGHT} fill="white" stroke="#000" strokeWidth="0.5"/>
             
-            {/* Margin guides */}
-            <g opacity="0.3">
-              <line {...marginGuides.top} stroke={settings.marginColor} strokeWidth="0.5" strokeDasharray="2,2" />
-              <line {...marginGuides.bottom} stroke={settings.marginColor} strokeWidth="0.5" strokeDasharray="2,2" />
-              <line {...marginGuides.left} stroke={settings.marginColor} strokeWidth="0.5" strokeDasharray="2,2" />
-              <line {...marginGuides.right} stroke={settings.marginColor} strokeWidth="0.5" strokeDasharray="2,2" />
+            {/* Margin guides - more visible */}
+            <g opacity="0.6">
+              <line {...marginGuides.top} stroke={settings.marginColor} strokeWidth="0.3" strokeDasharray="3,2" />
+              <line {...marginGuides.bottom} stroke={settings.marginColor} strokeWidth="0.3" strokeDasharray="3,2" />
+              <line {...marginGuides.left} stroke={settings.marginColor} strokeWidth="0.3" strokeDasharray="3,2" />
+              <line {...marginGuides.right} stroke={settings.marginColor} strokeWidth="0.3" strokeDasharray="3,2" />
             </g>
             
             {/* Define clipping path for writing area only */}
