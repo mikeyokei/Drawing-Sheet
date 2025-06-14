@@ -850,8 +850,9 @@ body {
     height: auto !important;
     max-width: calc(100vw - 1rem);
     max-height: 50vh;
-    box-shadow: 2px 2px 0 var(--black);
+    box-shadow: none;
     overflow: hidden;
+    /* Border width handled by inline styles for mobile responsiveness */
   }
   
   .brutalist-canvas svg {
@@ -1010,7 +1011,7 @@ body {
   
   .brutalist-canvas {
     max-height: 55vh;
-    box-shadow: 4px 4px 0 var(--black);
+    box-shadow: none;
   }
   
   .brutalist-section {
@@ -1050,7 +1051,7 @@ body {
   
   .brutalist-canvas {
     max-height: 60vh;
-    box-shadow: 4px 4px 0 var(--black);
+    box-shadow: none;
   }
   
   .brutalist-section {
