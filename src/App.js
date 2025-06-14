@@ -12,6 +12,12 @@ const HandwritingTemplateGenerator = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 480);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   
+  // State for section collapsing
+  const [sectionsCollapsed, setSectionsCollapsed] = useState({
+    margins: false,
+    typography: false
+  });
+  
   // State for page settings
   const [pageSettings, setPageSettings] = useState({
     orientation: 'portrait', // 'portrait' or 'landscape'
@@ -126,6 +132,14 @@ const HandwritingTemplateGenerator = () => {
       marginBottom: preset.bottom,
       marginLeft: preset.left,
       marginRight: preset.right
+    }));
+  };
+
+  // Toggle section collapse
+  const toggleSectionCollapse = (sectionName) => {
+    setSectionsCollapsed(prev => ({
+      ...prev,
+      [sectionName]: !prev[sectionName]
     }));
   };
 
@@ -737,146 +751,192 @@ const HandwritingTemplateGenerator = () => {
 
         {/* Margin Presets */}
         <div className="brutalist-section">
-          <h3 className="brutalist-section-title">Page Margins</h3>
+          <div 
+            onClick={() => toggleSectionCollapse('margins')}
+            style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              cursor: 'pointer',
+              marginBottom: sectionsCollapsed.margins ? 0 : 'var(--space-md)'
+            }}
+          >
+            <h3 className="brutalist-section-title" style={{ margin: 0 }}>Page Margins</h3>
+            <span style={{ 
+              fontSize: '0.8rem', 
+              fontWeight: 'bold',
+              transform: sectionsCollapsed.margins ? 'rotate(-90deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease'
+            }}>
+              ▼
+            </span>
+          </div>
           
-          <div className="brutalist-preset-grid">
-            {Object.entries(marginPresets).map(([key, preset]) => (
-              <button
-                key={key}
-                onClick={() => applyMarginPreset(preset)}
-                className={`brutalist-preset-btn ${
-                  settings.marginTop === preset.top && 
-                  settings.marginBottom === preset.bottom && 
-                  settings.marginLeft === preset.left && 
-                  settings.marginRight === preset.right ? 'active' : ''
-                }`}
-              >
-                {preset.name}
-              </button>
-            ))}
-          </div>
+          {!sectionsCollapsed.margins && (
+            <div>
+              <div className="brutalist-preset-grid">
+                {Object.entries(marginPresets).map(([key, preset]) => (
+                  <button
+                    key={key}
+                    onClick={() => applyMarginPreset(preset)}
+                    className={`brutalist-preset-btn ${
+                      settings.marginTop === preset.top && 
+                      settings.marginBottom === preset.bottom && 
+                      settings.marginLeft === preset.left && 
+                      settings.marginRight === preset.right ? 'active' : ''
+                    }`}
+                  >
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
 
-          {/* Current margin display */}
-          <div className="brutalist-mono" style={{ fontSize: '0.6rem', marginTop: '0.5rem', opacity: 0.7 }}>
-            T:{settings.marginTop} B:{settings.marginBottom} L:{settings.marginLeft} R:{settings.marginRight}mm
-          </div>
+              {/* Current margin display */}
+              <div className="brutalist-mono" style={{ fontSize: '0.6rem', marginTop: '0.5rem', opacity: 0.7 }}>
+                T:{settings.marginTop} B:{settings.marginBottom} L:{settings.marginLeft} R:{settings.marginRight}mm
+              </div>
 
-          {/* Fine-tune margins */}
-          <div style={{ marginTop: '1rem' }}>
-            <div className="brutalist-dual-stepper">
-              <BrutalistStepper
-                label="Top Margin"
-                value={settings.marginTop}
-                onChange={(value) => updateSetting('marginTop', value)}
-                min={5}
-                max={50}
-                step={1}
-                unit="mm"
-              />
-              <BrutalistStepper
-                label="Bottom Margin"
-                value={settings.marginBottom}
-                onChange={(value) => updateSetting('marginBottom', value)}
-                min={5}
-                max={50}
-                step={1}
-                unit="mm"
-              />
+              {/* Fine-tune margins */}
+              <div style={{ marginTop: '1rem' }}>
+                <div className="brutalist-dual-stepper">
+                  <BrutalistStepper
+                    label="Top Margin"
+                    value={settings.marginTop}
+                    onChange={(value) => updateSetting('marginTop', value)}
+                    min={5}
+                    max={50}
+                    step={1}
+                    unit="mm"
+                  />
+                  <BrutalistStepper
+                    label="Bottom Margin"
+                    value={settings.marginBottom}
+                    onChange={(value) => updateSetting('marginBottom', value)}
+                    min={5}
+                    max={50}
+                    step={1}
+                    unit="mm"
+                  />
+                </div>
+                
+                <div className="brutalist-dual-stepper">
+                  <BrutalistStepper
+                    label="Left Margin"
+                    value={settings.marginLeft}
+                    onChange={(value) => updateSetting('marginLeft', value)}
+                    min={5}
+                    max={50}
+                    step={1}
+                    unit="mm"
+                  />
+                  <BrutalistStepper
+                    label="Right Margin"
+                    value={settings.marginRight}
+                    onChange={(value) => updateSetting('marginRight', value)}
+                    min={5}
+                    max={50}
+                    step={1}
+                    unit="mm"
+                  />
+                </div>
+              </div>
             </div>
-            
-            <div className="brutalist-dual-stepper">
-              <BrutalistStepper
-                label="Left Margin"
-                value={settings.marginLeft}
-                onChange={(value) => updateSetting('marginLeft', value)}
-                min={5}
-                max={50}
-                step={1}
-                unit="mm"
-              />
-              <BrutalistStepper
-                label="Right Margin"
-                value={settings.marginRight}
-                onChange={(value) => updateSetting('marginRight', value)}
-                min={5}
-                max={50}
-                step={1}
-                unit="mm"
-              />
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Typography & Style Controls */}
         <div className="brutalist-section">
-          <h3 className="brutalist-section-title">Typography & Style</h3>
-          
-          {/* Compact dual steppers */}
-          <div className="brutalist-dual-stepper">
-            <BrutalistStepper
-              label="Number of Rows"
-              value={settings.numberOfLines}
-              onChange={(value) => updateSetting('numberOfLines', value)}
-              min={5}
-              max={20}
-              step={1}
-              unit=""
-            />
+          <div 
+            onClick={() => toggleSectionCollapse('typography')}
+            style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              cursor: 'pointer',
+              marginBottom: sectionsCollapsed.typography ? 0 : 'var(--space-md)'
+            }}
+          >
+            <h3 className="brutalist-section-title" style={{ margin: 0 }}>Typography & Style</h3>
+            <span style={{ 
+              fontSize: '0.8rem', 
+              fontWeight: 'bold',
+              transform: sectionsCollapsed.typography ? 'rotate(-90deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease'
+            }}>
+              ▼
+            </span>
           </div>
           
-          <div className="brutalist-dual-stepper">
-            <BrutalistStepper
-              label="Ascender Height"
-              value={settings.ascenderHeight}
-              onChange={(value) => updateSetting('ascenderHeight', value)}
-              min={2}
-              max={12}
-              step={0.25}
-              unit="mm"
-            />
-            <BrutalistStepper
-              label="Descender Depth"
-              value={settings.descenderDepth}
-              onChange={(value) => updateSetting('descenderDepth', value)}
-              min={2}
-              max={12}
-              step={0.25}
-              unit="mm"
-            />
-          </div>
-          
-          <div className="brutalist-dual-stepper">
-            <BrutalistStepper
-              label="X-Height"
-              value={settings.xHeight}
-              onChange={(value) => updateSetting('xHeight', value)}
-              min={2.5}
-              max={8}
-              step={0.25}
-              unit="mm"
-            />
-            <BrutalistStepper
-              label="Slant Angle"
-              value={settings.slantAngle}
-              onChange={(value) => updateSetting('slantAngle', value)}
-              min={45}
-              max={135}
-              step={0.5}
-              unit="°"
-            />
-          </div>
-          
-          <div className="brutalist-dual-stepper">
-            <BrutalistStepper
-              label="Baseline Thick"
-              value={settings.baselineThickness}
-              onChange={(value) => updateSetting('baselineThickness', value)}
-              min={0.1}
-              max={2.0}
-              step={0.05}
-              unit="mm"
-            />
-          </div>
+          {!sectionsCollapsed.typography && (
+            <div>
+              {/* Compact dual steppers */}
+              <div className="brutalist-dual-stepper">
+                <BrutalistStepper
+                  label="Number of Rows"
+                  value={settings.numberOfLines}
+                  onChange={(value) => updateSetting('numberOfLines', value)}
+                  min={5}
+                  max={20}
+                  step={1}
+                  unit=""
+                />
+              </div>
+              
+              <div className="brutalist-dual-stepper">
+                <BrutalistStepper
+                  label="Ascender Height"
+                  value={settings.ascenderHeight}
+                  onChange={(value) => updateSetting('ascenderHeight', value)}
+                  min={2}
+                  max={12}
+                  step={0.25}
+                  unit="mm"
+                />
+                <BrutalistStepper
+                  label="Descender Depth"
+                  value={settings.descenderDepth}
+                  onChange={(value) => updateSetting('descenderDepth', value)}
+                  min={2}
+                  max={12}
+                  step={0.25}
+                  unit="mm"
+                />
+              </div>
+              
+              <div className="brutalist-dual-stepper">
+                <BrutalistStepper
+                  label="X-Height"
+                  value={settings.xHeight}
+                  onChange={(value) => updateSetting('xHeight', value)}
+                  min={2.5}
+                  max={8}
+                  step={0.25}
+                  unit="mm"
+                />
+                <BrutalistStepper
+                  label="Slant Angle"
+                  value={settings.slantAngle}
+                  onChange={(value) => updateSetting('slantAngle', value)}
+                  min={45}
+                  max={135}
+                  step={0.5}
+                  unit="°"
+                />
+              </div>
+              
+              <div className="brutalist-dual-stepper">
+                <BrutalistStepper
+                  label="Baseline Thick"
+                  value={settings.baselineThickness}
+                  onChange={(value) => updateSetting('baselineThickness', value)}
+                  min={0.1}
+                  max={2.0}
+                  step={0.05}
+                  unit="mm"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Guide Lines */}
