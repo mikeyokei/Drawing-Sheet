@@ -14,8 +14,8 @@ const HandwritingTemplateGenerator = () => {
   
   // State for section collapsing
   const [sectionsCollapsed, setSectionsCollapsed] = useState({
-    margins: false,
-    typography: false
+    margins: true,
+    typography: true
   });
   
   // State for page settings
