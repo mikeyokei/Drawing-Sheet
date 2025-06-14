@@ -1,6 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTemplateStore, TYPOGRAPHY_PRESETS } from '../store/templateStore';
-import { Sliders, Type, Grid, FileDown, RotateCcw } from 'lucide-react';
+import { 
+  Sliders, 
+  Type, 
+  Grid, 
+  FileDown, 
+  RotateCcw, 
+  ChevronDown, 
+  ChevronUp,
+  Palette,
+  Layout,
+  Settings
+} from 'lucide-react';
 
 const ControlPanel = ({ onExportPDF }) => {
   const {
@@ -25,11 +36,27 @@ const ControlPanel = ({ onExportPDF }) => {
     setLayoutOption,
   } = useTemplateStore();
 
-  const SliderControl = ({ label, value, onChange, min, max, step, unit = '' }) => (
-    <div className="space-y-2">
-      <div className="flex justify-between items-center">
-        <label className="text-sm font-medium text-gray-700">{label}</label>
-        <span className="text-sm text-gray-500">{value}{unit}</span>
+  // Collapsible sections state
+  const [expandedSections, setExpandedSections] = useState({
+    presets: true,
+    typography: false,
+    layout: false,
+    grid: false,
+    colors: false
+  });
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const BrutalistSlider = ({ label, value, onChange, min, max, step, unit = '' }) => (
+    <div className="brutalist-stepper-container">
+      <div className="flex justify-between items-center mb-2">
+        <label className="brutalist-label">{label}</label>
+        <span className="brutalist-mono text-xs">{value}{unit}</span>
       </div>
       <input
         type="range"
@@ -38,275 +65,329 @@ const ControlPanel = ({ onExportPDF }) => {
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-track"
+        className="brutalist-slider w-full"
       />
     </div>
   );
 
-  const ColorPicker = ({ label, value, onChange }) => (
+  const BrutalistColorPicker = ({ label, value, onChange }) => (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-700">{label}</label>
-      <div className="flex items-center space-x-2">
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
-        />
-        <span className="text-sm text-gray-500">{value}</span>
+      <label className="brutalist-label">{label}</label>
+      <div className="flex items-center gap-3">
+        <div className="relative">
+          <input
+            type="color"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-10 h-10 border-2 border-black cursor-pointer bg-white"
+            style={{ appearance: 'none' }}
+          />
+          <div 
+            className="absolute inset-1 pointer-events-none"
+            style={{ backgroundColor: value }}
+          />
+        </div>
+        <span className="brutalist-mono text-xs flex-1">{value}</span>
       </div>
     </div>
   );
 
+  const BrutalistCheckbox = ({ label, checked, onChange, id }) => (
+    <div className="brutalist-checkbox-item">
+      <div className="brutalist-checkbox">
+        <input
+          type="checkbox"
+          id={id}
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+        />
+        <div className="brutalist-checkbox-mark"></div>
+      </div>
+      <label htmlFor={id} className="brutalist-checkbox-label">{label}</label>
+    </div>
+  );
+
+  const CollapsibleSection = ({ title, icon: Icon, isExpanded, onToggle, children, accent = false }) => (
+    <div className={`brutalist-section ${accent ? 'accent' : ''}`}>
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between text-left focus:outline-none group"
+      >
+        <div className="flex items-center gap-2">
+          <Icon className="w-4 h-4" />
+          <h3 className="brutalist-section-title">{title}</h3>
+        </div>
+        {isExpanded ? (
+          <ChevronUp className="w-4 h-4 transition-transform group-hover:scale-110" />
+        ) : (
+          <ChevronDown className="w-4 h-4 transition-transform group-hover:scale-110" />
+        )}
+      </button>
+      {isExpanded && (
+        <div className="mt-4 space-y-4">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+
   return (
-    <div className="w-80 bg-white rounded-lg shadow-lg p-6 space-y-6">
+    <div className="brutalist-panel">
       {/* Header */}
-      <div className="flex items-center space-x-2">
-        <Sliders className="w-5 h-5 text-primary-600" />
-        <h2 className="text-lg font-semibold text-gray-900">Template Controls</h2>
+      <div className="brutalist-section accent">
+        <div className="flex items-center gap-2">
+          <Sliders className="w-5 h-5" />
+          <h2 className="brutalist-title">Template Controls</h2>
+        </div>
       </div>
 
-      {/* Preset Selection */}
-      <div className="space-y-3">
-        <div className="flex items-center space-x-2">
-          <Type className="w-4 h-4 text-gray-600" />
-          <h3 className="font-medium text-gray-900">Presets</h3>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
+      {/* Preset Selection - Always visible at top */}
+      <CollapsibleSection
+        title="Presets"
+        icon={Type}
+        isExpanded={expandedSections.presets}
+        onToggle={() => toggleSection('presets')}
+      >
+        <div className="space-y-3">
           {Object.entries(TYPOGRAPHY_PRESETS).map(([key, preset]) => (
             <button
               key={key}
               onClick={() => setPreset(key)}
-              className={`px-3 py-2 text-xs rounded-md border transition-colors ${
-                currentPreset === key
-                  ? 'bg-primary-600 text-white border-primary-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
+              className={`brutalist-btn w-full ${currentPreset === key ? 'active' : ''}`}
             >
               {preset.name}
             </button>
           ))}
         </div>
-      </div>
+      </CollapsibleSection>
 
       {/* Typography Controls */}
-      <div className="space-y-4">
-        <h3 className="font-medium text-gray-900">Typography</h3>
-        
-        <SliderControl
-          label="Base Size"
-          value={baseSize}
-          onChange={setBaseSize}
-          min={10}
-          max={50}
-          step={1}
-          unit="mm"
-        />
-        
-        <SliderControl
-          label="X-Height Ratio"
-          value={metrics.xHeight}
-          onChange={(value) => setMetric('xHeight', value)}
-          min={0.2}
-          max={0.8}
-          step={0.01}
-        />
-        
-        <SliderControl
-          label="Cap Height Ratio"
-          value={metrics.capHeight}
-          onChange={(value) => setMetric('capHeight', value)}
-          min={0.4}
-          max={1.0}
-          step={0.01}
-        />
-        
-        <SliderControl
-          label="Ascender Ratio"
-          value={metrics.ascender}
-          onChange={(value) => setMetric('ascender', value)}
-          min={0.5}
-          max={1.2}
-          step={0.01}
-        />
-        
-        <SliderControl
-          label="Descender Ratio"
-          value={metrics.descender}
-          onChange={(value) => setMetric('descender', value)}
-          min={0.1}
-          max={0.5}
-          step={0.01}
-        />
-        
-        <SliderControl
-          label="Inter-Line Spacing"
-          value={metrics.lineSpacing}
-          onChange={(value) => setMetric('lineSpacing', value)}
-          min={1.0}
-          max={4.0}
-          step={0.05}
-          unit="x"
-        />
-        
-        <SliderControl
-          label="Metric Spacing"
-          value={metrics.metricSpacing}
-          onChange={(value) => setMetric('metricSpacing', value)}
-          min={0.5}
-          max={2.0}
-          step={0.05}
-          unit="x"
-        />
-        
-        <SliderControl
-          label="Slant Angle"
-          value={metrics.slantAngle}
-          onChange={(value) => setMetric('slantAngle', value)}
-          min={45}
-          max={135}
-          step={0.5}
-          unit="°"
-        />
-      </div>
+      <CollapsibleSection
+        title="Typography"
+        icon={Type}
+        isExpanded={expandedSections.typography}
+        onToggle={() => toggleSection('typography')}
+      >
+        <div className="space-y-4">
+          <BrutalistSlider
+            label="Base Size"
+            value={baseSize}
+            onChange={setBaseSize}
+            min={10}
+            max={50}
+            step={1}
+            unit="mm"
+          />
+          
+          <BrutalistSlider
+            label="X-Height"
+            value={metrics.xHeight}
+            onChange={(value) => setMetric('xHeight', value)}
+            min={0.2}
+            max={0.8}
+            step={0.01}
+          />
+          
+          <BrutalistSlider
+            label="Cap Height"
+            value={metrics.capHeight}
+            onChange={(value) => setMetric('capHeight', value)}
+            min={0.4}
+            max={1.0}
+            step={0.01}
+          />
+          
+          <BrutalistSlider
+            label="Ascender"
+            value={metrics.ascender}
+            onChange={(value) => setMetric('ascender', value)}
+            min={0.5}
+            max={1.2}
+            step={0.01}
+          />
+          
+          <BrutalistSlider
+            label="Descender"
+            value={metrics.descender}
+            onChange={(value) => setMetric('descender', value)}
+            min={0.1}
+            max={0.5}
+            step={0.01}
+          />
+          
+          <BrutalistSlider
+            label="Line Spacing"
+            value={metrics.lineSpacing}
+            onChange={(value) => setMetric('lineSpacing', value)}
+            min={1.0}
+            max={4.0}
+            step={0.05}
+            unit="x"
+          />
+          
+          <BrutalistSlider
+            label="Metric Spacing"
+            value={metrics.metricSpacing}
+            onChange={(value) => setMetric('metricSpacing', value)}
+            min={0.5}
+            max={2.0}
+            step={0.05}
+            unit="x"
+          />
+          
+          <BrutalistSlider
+            label="Slant Angle"
+            value={metrics.slantAngle}
+            onChange={(value) => setMetric('slantAngle', value)}
+            min={45}
+            max={135}
+            step={0.5}
+            unit="°"
+          />
+        </div>
+      </CollapsibleSection>
 
       {/* Layout Controls */}
-      <div className="space-y-4">
-        <h3 className="font-medium text-gray-900">Layout</h3>
-        
-        <SliderControl
-          label="Number of Lines"
-          value={numberOfLines}
-          onChange={(value) => setLayoutOption('numberOfLines', value)}
-          min={5}
-          max={20}
-          step={1}
-        />
-        
-        <SliderControl
-          label="Letter Spacing"
-          value={letterSpacing}
-          onChange={(value) => setLayoutOption('letterSpacing', value)}
-          min={2}
-          max={10}
-          step={0.5}
-          unit="mm"
-        />
-        
-        <SliderControl
-          label="Word Spacing"
-          value={wordSpacing}
-          onChange={(value) => setLayoutOption('wordSpacing', value)}
-          min={5}
-          max={25}
-          step={1}
-          unit="mm"
-        />
-      </div>
+      <CollapsibleSection
+        title="Layout"
+        icon={Layout}
+        isExpanded={expandedSections.layout}
+        onToggle={() => toggleSection('layout')}
+      >
+        <div className="space-y-4">
+          <BrutalistSlider
+            label="Number of Lines"
+            value={numberOfLines}
+            onChange={(value) => setLayoutOption('numberOfLines', value)}
+            min={5}
+            max={20}
+            step={1}
+          />
+          
+          <BrutalistSlider
+            label="Letter Spacing"
+            value={letterSpacing}
+            onChange={(value) => setLayoutOption('letterSpacing', value)}
+            min={2}
+            max={10}
+            step={0.5}
+            unit="mm"
+          />
+          
+          <BrutalistSlider
+            label="Word Spacing"
+            value={wordSpacing}
+            onChange={(value) => setLayoutOption('wordSpacing', value)}
+            min={5}
+            max={25}
+            step={1}
+            unit="mm"
+          />
+        </div>
+      </CollapsibleSection>
 
       {/* Grid Controls */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <Grid className="w-4 h-4 text-gray-600" />
-          <h3 className="font-medium text-gray-900">Grid Options</h3>
-        </div>
-        
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Grid Type</label>
-          <select
-            value={gridType}
-            onChange={(e) => setGridOption('gridType', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="ruled">Ruled Lines</option>
-            <option value="dotted">Dotted Grid</option>
-            <option value="none">No Grid</option>
-          </select>
-        </div>
-        
-        <SliderControl
-          label="Grid Opacity"
-          value={gridOpacity}
-          onChange={(value) => setGridOption('gridOpacity', value)}
-          min={0.1}
-          max={1.0}
-          step={0.1}
-        />
-        
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="showGrid"
-            checked={showGrid}
-            onChange={(e) => setGridOption('showGrid', e.target.checked)}
-            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+      <CollapsibleSection
+        title="Grid Options"
+        icon={Grid}
+        isExpanded={expandedSections.grid}
+        onToggle={() => toggleSection('grid')}
+      >
+        <div className="space-y-4">
+          <div className="brutalist-input-container">
+            <label className="brutalist-label">Grid Type</label>
+            <select
+              value={gridType}
+              onChange={(e) => setGridOption('gridType', e.target.value)}
+              className="brutalist-input"
+            >
+              <option value="ruled">Ruled Lines</option>
+              <option value="dotted">Dotted Grid</option>
+              <option value="none">No Grid</option>
+            </select>
+          </div>
+          
+          <BrutalistSlider
+            label="Grid Opacity"
+            value={gridOpacity}
+            onChange={(value) => setGridOption('gridOpacity', value)}
+            min={0.1}
+            max={1.0}
+            step={0.1}
           />
-          <label htmlFor="showGrid" className="text-sm text-gray-700">Show Grid</label>
+          
+          <div className="brutalist-checkbox-grid">
+            <BrutalistCheckbox
+              label="Show Grid"
+              id="showGrid"
+              checked={showGrid}
+              onChange={(checked) => setGridOption('showGrid', checked)}
+            />
+            
+            <BrutalistCheckbox
+              label="Show Slant Lines"
+              id="showSlantLines"
+              checked={showSlantLines}
+              onChange={(checked) => setGridOption('showSlantLines', checked)}
+            />
+            
+            <BrutalistCheckbox
+              label="Show Guide Lines"
+              id="showGuideLines"
+              checked={showGuideLines}
+              onChange={(checked) => setGridOption('showGuideLines', checked)}
+            />
+          </div>
         </div>
-        
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="showSlantLines"
-            checked={showSlantLines}
-            onChange={(e) => setGridOption('showSlantLines', e.target.checked)}
-            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-          />
-          <label htmlFor="showSlantLines" className="text-sm text-gray-700">Show Slant Lines</label>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="showGuideLines"
-            checked={showGuideLines}
-            onChange={(e) => setGridOption('showGuideLines', e.target.checked)}
-            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-          />
-          <label htmlFor="showGuideLines" className="text-sm text-gray-700">Show Guide Lines (x-height, cap height, etc.)</label>
-        </div>
-      </div>
+      </CollapsibleSection>
 
       {/* Color Controls */}
-      <div className="space-y-4">
-        <h3 className="font-medium text-gray-900">Colors</h3>
-        
-        <ColorPicker
-          label="Baseline Color"
-          value={baselineColor}
-          onChange={(value) => setGridOption('baselineColor', value)}
-        />
-        
-        <ColorPicker
-          label="Grid Color"
-          value={gridColor}
-          onChange={(value) => setGridOption('gridColor', value)}
-        />
-        
-        <ColorPicker
-          label="Slant Line Color"
-          value={slantLineColor}
-          onChange={(value) => setGridOption('slantLineColor', value)}
-        />
-      </div>
+      <CollapsibleSection
+        title="Colors"
+        icon={Palette}
+        isExpanded={expandedSections.colors}
+        onToggle={() => toggleSection('colors')}
+      >
+        <div className="space-y-4">
+          <BrutalistColorPicker
+            label="Baseline"
+            value={baselineColor}
+            onChange={(value) => setGridOption('baselineColor', value)}
+          />
+          
+          <BrutalistColorPicker
+            label="Grid"
+            value={gridColor}
+            onChange={(value) => setGridOption('gridColor', value)}
+          />
+          
+          <BrutalistColorPicker
+            label="Slant Lines"
+            value={slantLineColor}
+            onChange={(value) => setGridOption('slantLineColor', value)}
+          />
+        </div>
+      </CollapsibleSection>
 
-      {/* Export Controls */}
-      <div className="space-y-3 pt-4 border-t border-gray-200">
-        <button
-          onClick={onExportPDF}
-          className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-        >
-          <FileDown className="w-4 h-4" />
-          <span>Export PDF</span>
-        </button>
-        
-        <button
-          onClick={() => setPreset('minimal')}
-          className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          <RotateCcw className="w-4 h-4" />
-          <span>Reset to Minimal</span>
-        </button>
+      {/* Export Controls - Always visible at bottom */}
+      <div className="brutalist-section">
+        <div className="space-y-3">
+          <button
+            onClick={onExportPDF}
+            className="brutalist-btn-accent"
+          >
+            <FileDown className="w-4 h-4" />
+            Export PDF
+          </button>
+          
+          <button
+            onClick={() => setPreset('minimal')}
+            className="brutalist-btn w-full"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Reset to Minimal
+          </button>
+        </div>
       </div>
     </div>
   );

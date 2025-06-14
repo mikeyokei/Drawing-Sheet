@@ -16,17 +16,18 @@
   font-display: swap;
 }
 
-/* Brutalist Design System */
+/* Enhanced Brutalist Design System */
 :root {
   --black: #000000;
   --white: #ffffff;
-  --gray-50: #fafafa;
-  --gray-100: #f5f5f5;
-  --gray-200: #e5e5e5;
-  --gray-300: #d4d4d4;
-  --gray-800: #262626;
-  --accent: #008080;
-  --accent-hover: #006666;
+  --gray-50: #f8f8f8;
+  --gray-100: #f0f0f0;
+  --gray-200: #e0e0e0;
+  --gray-300: #d0d0d0;
+  --gray-800: #1a1a1a;
+  --accent: #20b2aa;
+  --accent-hover: #17a2b8;
+  --accent-soft: #b3e5e0;
   
   /* Handwriting Practice Colors - Research-Based */
   --baseline-color: #000000;
@@ -34,6 +35,19 @@
   --topline-color: #0066cc;
   --slant-color: #ff6600;
   --margin-color: #ff0000;
+  
+  /* Brutalist Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  
+  /* Border weights */
+  --border-thin: 1px;
+  --border-medium: 2px;
+  --border-thick: 4px;
+  --border-ultra: 6px;
 }
 
 * {
@@ -43,85 +57,108 @@
 body {
   margin: 0;
   font-family: 'ArkSans';
-  font-weight: 500;
+  font-weight: 600;
   background: var(--gray-50);
   color: var(--black);
-  line-height: 1.4;
+  line-height: 1.2;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Typography */
+/* Enhanced Typography Hierarchy */
 .brutalist-title {
   font-family: 'ArkSans';
   font-weight: 900;
-  font-size: 1.5rem;
-  letter-spacing: -0.025em;
-  line-height: 1.1;
-  color: var(--black);
+  font-size: 1.75rem;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  color: var(--white);
   text-transform: uppercase;
+  margin: 0;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
 }
 
 .brutalist-section-title {
   font-family: 'ArkSans';
-  font-weight: 800;
-  font-size: 0.875rem;
-  letter-spacing: 0.05em;
+  font-weight: 900;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--black);
-  margin: 0;
+  margin: 0 0 var(--space-md) 0;
 }
 
 .brutalist-label {
   font-family: 'ArkSans';
-  font-weight: 600;
-  font-size: 0.75rem;
-  letter-spacing: 0.025em;
+  font-weight: 700;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--gray-800);
+  margin: 0 0 var(--space-xs) 0;
+  display: block;
 }
 
 .brutalist-mono {
   font-family: 'ArkSans';
-  font-weight: 600;
-  letter-spacing: -0.025em;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  font-size: 0.65rem;
+  text-transform: uppercase;
 }
 
-/* Layout */
+/* Improved Layout with Stronger Grid */
 .brutalist-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 320px 1fr;
   min-height: 100vh;
   background: var(--gray-50);
+  gap: 0;
 }
 
 .brutalist-panel {
-  width: 280px;
   background: var(--white);
-  border-right: 3px solid var(--black);
+  border-right: var(--border-ultra) solid var(--black);
   padding: 0;
   overflow-y: auto;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
-.brutalist-panel::after {
-  display: none;
-}
+
 
 .brutalist-canvas-area {
-  flex: 1;
   display: grid;
   place-items: center;
-  padding: 1rem;
+  padding: var(--space-xl);
   background: var(--gray-50);
   min-height: 100vh;
   overflow: auto;
+  position: relative;
 }
 
-/* Panel Sections */
+.brutalist-canvas-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    linear-gradient(90deg, var(--gray-200) 1px, transparent 1px),
+    linear-gradient(var(--gray-200) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Enhanced Panel Sections */
 .brutalist-section {
-  border-bottom: 2px solid var(--black);
-  padding: 1rem;
+  border-bottom: var(--border-thick) solid var(--black);
+  padding: var(--space-lg);
   background: var(--white);
+  position: relative;
 }
 
 .brutalist-section:last-child {
@@ -131,87 +168,111 @@ body {
 .brutalist-section.accent {
   background: var(--black);
   color: var(--white);
+  position: relative;
+  overflow: hidden;
 }
+
+
 
 .brutalist-section.accent .brutalist-section-title,
 .brutalist-section.accent .brutalist-label {
   color: var(--white);
 }
 
-/* Controls */
+
+
+/* Improved Controls with Stronger Hierarchy */
 .brutalist-preset-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
 }
 
 .brutalist-btn {
   font-family: 'ArkSans';
   background: var(--white);
-  border: 2px solid var(--black);
+  border: var(--border-medium) solid var(--black);
   color: var(--black);
-  font-weight: 700;
-  font-size: 0.75rem;
+  font-weight: 800;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.025em;
-  padding: 0.75rem 1rem;
+  letter-spacing: 0.05em;
+  padding: var(--space-md);
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  box-shadow: var(--border-medium) var(--border-medium) 0 var(--gray-300);
 }
 
 .brutalist-btn:hover {
   background: var(--black);
   color: var(--white);
-  transform: translate(-2px, -2px);
-  box-shadow: 2px 2px 0 var(--black);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--gray-800);
+}
+
+.brutalist-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--gray-300);
 }
 
 .brutalist-btn.active {
-  background: var(--black);
+  background: var(--accent);
   color: var(--white);
-  transform: translate(-2px, -2px);
-  box-shadow: 2px 2px 0 var(--accent);
+  border-color: var(--black);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--black);
 }
 
 .brutalist-btn-accent {
   font-family: 'ArkSans';
   background: var(--accent);
-  border: 2px solid var(--black);
+  border: var(--border-medium) solid var(--black);
   color: var(--white);
-  font-weight: 700;
-  font-size: 0.875rem;
+  font-weight: 800;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.025em;
-  padding: 1rem;
+  letter-spacing: 0.05em;
+  padding: var(--space-lg);
   cursor: pointer;
-  transition: all 0.1s ease;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
+  position: relative;
+  box-shadow: var(--border-medium) var(--border-medium) 0 var(--black);
 }
 
 .brutalist-btn-accent:hover {
   background: var(--accent-hover);
   transform: translate(-2px, -2px);
-  box-shadow: 2px 2px 0 var(--black);
+  box-shadow: 4px 4px 0 var(--black);
 }
 
-/* Enhanced Steppers with refined UX */
+.brutalist-btn-accent:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--black);
+}
+
+/* Brutalist Stepper Components */
 .brutalist-stepper-container {
-  margin: 0.5rem 0;
+  margin: var(--space-md) 0;
   position: relative;
+  background: var(--white);
+  border: var(--border-medium) solid var(--black);
+  padding: var(--space-md);
 }
 
-/* Compact dual stepper layout */
+
+
 .brutalist-dual-stepper {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-  margin: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin: var(--space-md) 0;
 }
 
 .brutalist-dual-stepper .brutalist-stepper-container {
@@ -219,31 +280,36 @@ body {
 }
 
 .brutalist-stepper-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.375rem;
-  gap: 0.375rem;
+  display: block;
+  font-family: 'ArkSans';
+  font-weight: 800;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--black);
+  margin-bottom: var(--space-sm);
 }
+
+
 
 .brutalist-stepper-value-container {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.125rem;
-  min-width: 50px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
 }
 
 .brutalist-stepper-value {
   font-family: 'ArkSans';
-  font-weight: 700;
-  font-size: 0.65rem;
+  font-weight: 900;
+  font-size: 1rem;
   background: var(--black);
   color: var(--white);
-  padding: 0.125rem 0.375rem;
+  padding: var(--space-xs) var(--space-sm);
   letter-spacing: -0.025em;
-  transition: all 0.2s ease;
-  border: 2px solid var(--black);
+  border: var(--border-medium) solid var(--black);
+  box-shadow: 2px 2px 0 var(--gray-300);
+  position: relative;
 }
 
 .brutalist-stepper-range-indicator {
@@ -324,7 +390,7 @@ body {
 }
 
 .brutalist-stepper-btn:disabled {
-  background: var(--gray-400);
+  background: var(--gray-300);
   cursor: not-allowed;
   opacity: 0.5;
   transform: none;
@@ -611,37 +677,49 @@ body {
   border: none;
 }
 
-/* Checkboxes */
+/* Enhanced Brutalist Checkboxes */
 .brutalist-checkbox-container {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
 }
 
-/* Compact checkbox grid layout */
 .brutalist-checkbox-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
 }
 
 .brutalist-checkbox-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-sm);
   cursor: pointer;
+  padding: var(--space-sm);
+  border: var(--border-medium) solid transparent;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--gray-100);
+  position: relative;
+}
+
+.brutalist-checkbox-item:hover {
+  border-color: var(--black);
+  background: var(--white);
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 var(--gray-300);
 }
 
 .brutalist-checkbox {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--black);
+  width: 20px;
+  height: 20px;
+  border: var(--border-medium) solid var(--black);
   background: var(--white);
   position: relative;
   cursor: pointer;
   flex-shrink: 0;
+  box-shadow: 1px 1px 0 var(--gray-300);
 }
 
 .brutalist-checkbox input[type="checkbox"] {
@@ -654,63 +732,86 @@ body {
 }
 
 .brutalist-checkbox input[type="checkbox"]:checked + .brutalist-checkbox-mark {
-  display: block;
+  display: flex;
+  background: var(--accent);
+}
+
+.brutalist-checkbox input[type="checkbox"]:checked + .brutalist-checkbox-mark::after {
+  content: '✓';
+  color: var(--white);
+  font-weight: 900;
+  font-size: 0.75rem;
 }
 
 .brutalist-checkbox-mark {
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  background: var(--black);
+  top: -2px;
+  left: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  background: var(--white);
+  border: var(--border-medium) solid var(--black);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .brutalist-checkbox-label {
   font-family: 'ArkSans';
-  font-weight: 600;
-  font-size: 0.75rem;
+  font-weight: 700;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.05em;
+  color: var(--black);
+  line-height: 1.1;
 }
 
-/* Input Components */
+/* Enhanced Input Components */
 .brutalist-input-container {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--space-xs);
+  position: relative;
 }
 
 .brutalist-input {
   font-family: 'ArkSans';
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
   background: var(--white);
-  border: 2px solid var(--black);
+  border: var(--border-medium) solid var(--black);
   color: var(--black);
-  padding: 0.75rem;
-  transition: all 0.1s ease;
+  padding: var(--space-md);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
+  box-shadow: 2px 2px 0 var(--gray-300);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
 .brutalist-input:focus {
   background: var(--gray-50);
-  transform: translate(-2px, -2px);
-  box-shadow: 2px 2px 0 var(--black);
+  transform: translate(-3px, -3px);
+  box-shadow: 4px 4px 0 var(--black);
+  border-color: var(--accent);
 }
 
 .brutalist-input:hover {
   background: var(--gray-50);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--gray-800);
 }
 
-/* Canvas */
+/* Enhanced Canvas with Brutalist Frame */
 .brutalist-canvas {
   background: var(--white);
-  border: 2px solid var(--black);
+  border: var(--border-ultra) solid var(--black);
   position: relative;
+  box-shadow: 6px 6px 0 var(--gray-300);
 }
+
+
 
 .brutalist-canvas svg {
   display: block;
@@ -729,30 +830,39 @@ body {
   font-size: 3px;
 }
 
-/* Responsive */
+/* Enhanced Responsive Design */
 @media (max-width: 1024px) {
   .brutalist-container {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
   }
   
   .brutalist-panel {
-    width: 100%;
     border-right: none;
-    border-bottom: 3px solid var(--black);
+    border-bottom: var(--border-ultra) solid var(--black);
+    order: 1;
   }
   
-  .brutalist-panel::after {
-    display: none;
-  }
+
   
   .brutalist-canvas-area {
-    padding: 0.25rem;
+    padding: var(--space-md);
     min-height: auto;
+    order: 2;
   }
   
   .brutalist-canvas {
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 300px);
     box-shadow: 4px 4px 0 var(--black);
+  }
+  
+  .brutalist-section {
+    padding: var(--space-md);
+  }
+  
+  .brutalist-dual-stepper {
+    flex-direction: column;
+    gap: var(--space-sm);
   }
 }
 

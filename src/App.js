@@ -43,13 +43,14 @@ const HandwritingTemplateGenerator = () => {
   
   // State for template settings - Based on handwriting research
   const [settings, setSettings] = useState({
-    // Typography metrics (in mm) - Research-based standards
-    xHeight: 4, // Optimal for elementary students
-    capHeight: 6, // 1.5x x-height for proper proportions
-    ascenderHeight: 15, // Increased height for better letter practice
-    descenderDepth: 3, // 0.75x x-height for balance
-    numberOfLines: 12, // Number of lines to display on the sheet
-    interlineSpacing: 6, // Spacing between baseline and next ascender in mm
+    // Typography metrics (in mm) - Equal spacing between lines by default
+    // For 5mm equal spacing: ascender-to-xheight = xheight-to-baseline = baseline-to-descender = 5mm
+    xHeight: 5, // Space from x-height to baseline
+    capHeight: 8, // 1.6x x-height for proper proportions
+    ascenderHeight: 10, // Total space from ascender to baseline (xHeight + 5mm spacing)
+    descenderDepth: 5, // Space from baseline to descender
+    numberOfLines: 12, // More rows to reduce spacing between them
+    interlineSpacing: 6, // Spacing between row groups (each row contains ascender + baseline + descender)
     
     // Layout settings - Educational best practices
     slantAngle: 75, // Default slant angle (75° from baseline, typical for calligraphy)
@@ -58,20 +59,20 @@ const HandwritingTemplateGenerator = () => {
     marginLeft: 20, // Adequate space for line labels
     marginRight: 15, // Optimized right margin
     
-    // Grid options - Research-informed settings
+    // Grid options - Research-informed settings (showing all 4 main lines by default)
     showSlantLines: true,
     showGrid: false, // Default to minimal for clarity
-    showXHeight: false, // Optional for basic practice
+    showXHeight: true, // Show x-height line by default for complete row
     showCapHeight: false, // Optional for advanced practice
-    showAscender: true, // Important for tall letters
-    showDescender: false, // Optional for practice
+    showAscender: true, // Show ascender line by default
+    showDescender: true, // Show descender line by default 
     showLineLabels: false, // Optional for learning
     gridSpacing: 5, // Fine grid for precision
     slantLineSpacing: 6, // Optimal spacing for letter width practice
     
     // Line styles - Enhanced visibility
     baselineOpacity: 1.0, // Always fully visible
-    baselineThickness: 0.6, // Baseline thickness in mm
+    baselineThickness: 0.3, // Thinner baseline thickness in mm
     guidelineOpacity: 0.6, // More visible than before for better guidance
     guidelineThickness: 0.3, // Guide line thickness in mm
     slantLineOpacity: 0.5, // Balanced visibility
@@ -101,54 +102,53 @@ const HandwritingTemplateGenerator = () => {
     updatePageSetting('orientation', newOrientation);
   };
 
-  // Enhanced line calculation with dynamic spacing distribution
+  // Baseline-relative line calculation - baseline stays fixed, other lines move relative to it
   const calculateLines = () => {
-    const { marginTop, marginBottom, numberOfLines, xHeight, capHeight, ascenderHeight, descenderDepth, interlineSpacing } = settings;
+    const { marginTop, marginBottom, numberOfLines, ascenderHeight, descenderDepth, xHeight } = settings;
     
     // Calculate available writing area height
     const availableHeight = CURRENT_HEIGHT - marginTop - marginBottom;
     
-    // Calculate minimum space needed for the first line (ascender space)
-    const firstLineOffset = ascenderHeight;
+    // Calculate the total height needed for each row (from ascender to descender)
+    const rowHeight = ascenderHeight + descenderDepth;
     
-    // Reserve extra space at the bottom to ensure the last line with descenders fits
-    const bottomBuffer = descenderDepth + 5; // Add 5mm buffer for last line descenders
+         // Calculate minimum spacing between rows (descender of row above to ascender of row below)
+     const minRowSpacing = 0.5; // 0.5mm minimum gap between descender and ascender of adjacent rows
     
-    // Calculate available space for line distribution
-    const distributionHeight = availableHeight - firstLineOffset - bottomBuffer;
+    // Calculate total height needed for all rows
+    const totalRowsHeight = numberOfLines * rowHeight;
+    const totalSpacingHeight = (numberOfLines - 1) * minRowSpacing;
+    const totalNeededHeight = totalRowsHeight + totalSpacingHeight;
     
-    // Calculate optimal spacing to fill the page
-    let actualLineSpacing;
-    if (numberOfLines > 1) {
-      // Distribute the available space evenly among the lines
-      actualLineSpacing = distributionHeight / (numberOfLines - 1);
-      
-      // Ensure minimum spacing (don't make lines too cramped)
-      const minSpacing = ascenderHeight + descenderDepth + 3; // 3mm minimum gap
-      if (actualLineSpacing < minSpacing) {
-        actualLineSpacing = minSpacing;
-      }
-    } else {
-      actualLineSpacing = interlineSpacing + ascenderHeight + descenderDepth;
+    // Calculate actual spacing between rows
+    let rowSpacing = minRowSpacing;
+    if (totalNeededHeight < availableHeight) {
+      // We have extra space, distribute it evenly
+      const extraSpace = availableHeight - totalRowsHeight - totalSpacingHeight;
+      rowSpacing = minRowSpacing + (extraSpace / (numberOfLines + 1));
     }
     
     const lines = [];
     
     for (let i = 0; i < numberOfLines; i++) {
-      const baselineY = marginTop + firstLineOffset + (i * actualLineSpacing);
+      // Calculate baseline position for this row
+      // Start from top margin + spacing + ascender height, then add previous rows
+      const baselineY = marginTop + rowSpacing + ascenderHeight + (i * (rowHeight + rowSpacing));
       
-      // Ensure the line doesn't go beyond the safe writing area
-      const maxBaselineY = CURRENT_HEIGHT - marginBottom - descenderDepth - 5; // 5mm safety margin
-      
-      if (baselineY <= maxBaselineY) {
+      // Check if this row fits within the available area
+      const rowBottomY = baselineY + descenderDepth;
+      if (rowBottomY <= CURRENT_HEIGHT - marginBottom) {
         lines.push({
           baseline: baselineY,
-          xHeightLine: baselineY - xHeight,
-          capHeightLine: baselineY - capHeight,
-          ascenderLine: baselineY - ascenderHeight,
-          descenderLine: baselineY + descenderDepth,
+          xHeightLine: baselineY - xHeight, // X-height above baseline
+          capHeightLine: baselineY - settings.capHeight, // Cap height above baseline (for reference)
+          ascenderLine: baselineY - ascenderHeight, // Ascender above baseline
+          descenderLine: baselineY + descenderDepth, // Descender below baseline
           groupIndex: Math.floor(i / 3), // For label grouping only
-          lineIndex: i % 3
+          lineIndex: i % 3,
+          rowIndex: i, // Track which row this is
+          rowSpacing: rowSpacing, // Store the calculated spacing for reference
+          rowHeight: rowHeight // Store row height
         });
       }
     }
@@ -239,6 +239,67 @@ const HandwritingTemplateGenerator = () => {
       left: { x1: marginLeft, y1: 0, x2: marginLeft, y2: CURRENT_HEIGHT },
       right: { x1: CURRENT_WIDTH - marginRight, y1: 0, x2: CURRENT_WIDTH - marginRight, y2: CURRENT_HEIGHT }
     };
+  };
+
+  // Generate white rectangles to cover spacing areas between rows
+  const generateRowSpacingMasks = () => {
+    if (lines.length === 0) return [];
+    
+    const { marginLeft, marginRight, marginTop, marginBottom } = settings;
+    const spacingRects = [];
+    
+    // Add mask for the area above the first row (from top margin to first ascender)
+    if (lines.length > 0) {
+      const firstRow = lines[0];
+      const topSpaceTop = marginTop;
+      const topSpaceBottom = firstRow.ascenderLine;
+      
+      if (topSpaceBottom > topSpaceTop) {
+        spacingRects.push({
+          x: marginLeft,
+          y: topSpaceTop,
+          width: CURRENT_WIDTH - marginLeft - marginRight,
+          height: topSpaceBottom - topSpaceTop
+        });
+      }
+    }
+    
+    // Add masks between rows
+    for (let i = 0; i < lines.length - 1; i++) {
+      const currentRow = lines[i];
+      const nextRow = lines[i + 1];
+      
+      // Calculate the spacing area between current row's descender and next row's ascender
+      const spacingTop = currentRow.descenderLine;
+      const spacingBottom = nextRow.ascenderLine;
+      
+      if (spacingBottom > spacingTop) {
+        spacingRects.push({
+          x: marginLeft,
+          y: spacingTop,
+          width: CURRENT_WIDTH - marginLeft - marginRight,
+          height: spacingBottom - spacingTop
+        });
+      }
+    }
+    
+    // Add mask for the area below the last row (from last descender to bottom margin)
+    if (lines.length > 0) {
+      const lastRow = lines[lines.length - 1];
+      const bottomSpaceTop = lastRow.descenderLine;
+      const bottomSpaceBottom = CURRENT_HEIGHT - marginBottom;
+      
+      if (bottomSpaceBottom > bottomSpaceTop) {
+        spacingRects.push({
+          x: marginLeft,
+          y: bottomSpaceTop,
+          width: CURRENT_WIDTH - marginLeft - marginRight,
+          height: bottomSpaceBottom - bottomSpaceTop
+        });
+      }
+    }
+    
+    return spacingRects;
   };
 
   // Export SVG
@@ -355,17 +416,21 @@ const HandwritingTemplateGenerator = () => {
     }
   };
 
-  const lines = calculateLines();
-  const slantLines = generateSlantLines();
-  const { verticalLines, horizontalLines } = generateGridLines();
-  const marginGuides = generateMarginGuides();
+  // Calculate all line data - these will recalculate when settings change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const lines = React.useMemo(() => calculateLines(), [settings, CURRENT_WIDTH, CURRENT_HEIGHT]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const slantLines = React.useMemo(() => generateSlantLines(), [settings, CURRENT_WIDTH, CURRENT_HEIGHT]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const { verticalLines, horizontalLines } = React.useMemo(() => generateGridLines(), [settings, CURRENT_WIDTH, CURRENT_HEIGHT]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const marginGuides = React.useMemo(() => generateMarginGuides(), [settings, CURRENT_WIDTH, CURRENT_HEIGHT]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const rowSpacingMasks = React.useMemo(() => generateRowSpacingMasks(), [lines, settings, CURRENT_WIDTH, CURRENT_HEIGHT]);
 
   // Enhanced tap-friendly stepper component with refined UX
   const BrutalistStepper = ({ label, value, onChange, min, max, step, unit = '' }) => {
-    const [isPressed, setIsPressed] = React.useState({ dec: false, inc: false });
     const [inputFocused, setInputFocused] = React.useState(false);
-    const intervalRef = React.useRef(null);
-    const timeoutRef = React.useRef(null);
 
     const handleDecrement = () => {
       const newValue = Math.max(min, value - step);
@@ -384,27 +449,7 @@ const HandwritingTemplateGenerator = () => {
       }
     };
 
-    // Enhanced button press with hold-to-repeat functionality
-    const handleButtonPress = (direction, isMouseDown) => {
-      if (isMouseDown) {
-        setIsPressed(prev => ({ ...prev, [direction]: true }));
-        
-        // Immediate action
-        const action = direction === 'inc' ? handleIncrement : handleDecrement;
-        action();
-        
-        // Start repeat after delay
-        timeoutRef.current = setTimeout(() => {
-          intervalRef.current = setInterval(() => {
-            action();
-          }, 80); // Fast repeat rate
-        }, 400); // Initial delay before repeat starts
-      } else {
-        setIsPressed(prev => ({ ...prev, [direction]: false }));
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        if (intervalRef.current) clearInterval(intervalRef.current);
-      }
-    };
+
 
     // Keyboard navigation support
     const handleKeyDown = (e) => {
@@ -417,13 +462,7 @@ const HandwritingTemplateGenerator = () => {
       }
     };
 
-    // Cleanup on unmount
-    React.useEffect(() => {
-      return () => {
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        if (intervalRef.current) clearInterval(intervalRef.current);
-      };
-    }, []);
+
 
     // Calculate percentage for visual feedback
     const percentage = ((value - min) / (max - min)) * 100;
@@ -444,12 +483,8 @@ const HandwritingTemplateGenerator = () => {
         </div>
         <div className="brutalist-stepper-controls">
           <button 
-            className={`brutalist-stepper-btn ${isPressed.dec ? 'pressed' : ''}`}
-            onMouseDown={() => handleButtonPress('dec', true)}
-            onMouseUp={() => handleButtonPress('dec', false)}
-            onMouseLeave={() => handleButtonPress('dec', false)}
-            onTouchStart={() => handleButtonPress('dec', true)}
-            onTouchEnd={() => handleButtonPress('dec', false)}
+            className="brutalist-stepper-btn"
+            onClick={handleDecrement}
             disabled={value <= min}
             title={`Decrease ${label} (${step}${unit})`}
             aria-label={`Decrease ${label}`}
@@ -474,12 +509,8 @@ const HandwritingTemplateGenerator = () => {
             <div className="brutalist-stepper-input-overlay"></div>
           </div>
           <button 
-            className={`brutalist-stepper-btn ${isPressed.inc ? 'pressed' : ''}`}
-            onMouseDown={() => handleButtonPress('inc', true)}
-            onMouseUp={() => handleButtonPress('inc', false)}
-            onMouseLeave={() => handleButtonPress('inc', false)}
-            onTouchStart={() => handleButtonPress('inc', true)}
-            onTouchEnd={() => handleButtonPress('inc', false)}
+            className="brutalist-stepper-btn"
+            onClick={handleIncrement}
             disabled={value >= max}
             title={`Increase ${label} (${step}${unit})`}
             aria-label={`Increase ${label}`}
@@ -489,7 +520,7 @@ const HandwritingTemplateGenerator = () => {
         </div>
         
         {/* Quick preset buttons for common values */}
-        {(label === 'Number of Lines' || label === 'X-Height' || label === 'Slant Angle') && (
+        {(label === 'Number of Lines' || label === 'X-Height' || label === 'Slant Angle' || label === 'Ascender Height' || label === 'Descender Depth') && (
           <div className="brutalist-stepper-presets">
             {label === 'Number of Lines' && [8, 12, 16, 20].map(preset => (
               <button
@@ -502,6 +533,26 @@ const HandwritingTemplateGenerator = () => {
               </button>
             ))}
             {label === 'X-Height' && [3, 4, 5, 6].map(preset => (
+              <button
+                key={preset}
+                onClick={() => onChange(preset)}
+                className={`brutalist-preset-btn ${value === preset ? 'active' : ''}`}
+                title={`Set to ${preset}mm`}
+              >
+                {preset}
+              </button>
+            ))}
+            {label === 'Ascender Height' && [6, 8, 10, 12].map(preset => (
+              <button
+                key={preset}
+                onClick={() => onChange(preset)}
+                className={`brutalist-preset-btn ${value === preset ? 'active' : ''}`}
+                title={`Set to ${preset}mm`}
+              >
+                {preset}
+              </button>
+            ))}
+            {label === 'Descender Depth' && [6, 8, 10, 12].map(preset => (
               <button
                 key={preset}
                 onClick={() => onChange(preset)}
@@ -624,20 +675,32 @@ const HandwritingTemplateGenerator = () => {
           {/* Compact dual steppers */}
           <div className="brutalist-dual-stepper">
             <BrutalistStepper
-              label="Number of Lines"
+              label="Number of Rows"
               value={settings.numberOfLines}
               onChange={(value) => updateSetting('numberOfLines', value)}
               min={5}
-              max={25}
+              max={20}
               step={1}
               unit=""
             />
+          </div>
+          
+          <div className="brutalist-dual-stepper">
             <BrutalistStepper
               label="Ascender Height"
               value={settings.ascenderHeight}
               onChange={(value) => updateSetting('ascenderHeight', value)}
-              min={4}
-              max={30}
+              min={2}
+              max={12}
+              step={0.25}
+              unit="mm"
+            />
+            <BrutalistStepper
+              label="Descender Depth"
+              value={settings.descenderDepth}
+              onChange={(value) => updateSetting('descenderDepth', value)}
+              min={2}
+              max={12}
               step={0.25}
               unit="mm"
             />
@@ -665,15 +728,6 @@ const HandwritingTemplateGenerator = () => {
           </div>
           
           <div className="brutalist-dual-stepper">
-            <BrutalistStepper
-              label="Interline Spacing"
-              value={settings.interlineSpacing}
-              onChange={(value) => updateSetting('interlineSpacing', value)}
-              min={2}
-              max={20}
-              step={0.5}
-              unit="mm"
-            />
             <BrutalistStepper
               label="Baseline Thick"
               value={settings.baselineThickness}
@@ -800,6 +854,22 @@ const HandwritingTemplateGenerator = () => {
                     y2={line.y2}
                     stroke={settings.slantLineColor}
                     strokeWidth="0.2"
+                  />
+                ))}
+              </g>
+            )}
+            
+            {/* White rectangles to mask slant lines in row spacing areas */}
+            {settings.showSlantLines && settings.slantAngle !== 0 && (
+              <g>
+                {rowSpacingMasks.map((rect, i) => (
+                  <rect
+                    key={`spacing-mask-${i}`}
+                    x={rect.x}
+                    y={rect.y}
+                    width={rect.width}
+                    height={rect.height}
+                    fill="white"
                   />
                 ))}
               </g>
