@@ -949,7 +949,11 @@ const HandwritingTemplateGenerator = () => {
       <div className={`brutalist-canvas-area ${isMobile && isPanelCollapsed ? 'panel-collapsed' : ''}`}>
         <div 
           className="brutalist-canvas" 
-          style={{ width: CURRENT_WIDTH * SCALE_FACTOR, height: CURRENT_HEIGHT * SCALE_FACTOR }}
+          style={{ 
+            width: CURRENT_WIDTH * SCALE_FACTOR, 
+            height: CURRENT_HEIGHT * SCALE_FACTOR,
+            borderWidth: Math.max(2, Math.round(SCALE_FACTOR * 2)) + 'px'
+          }}
         >
           <svg
             ref={svgRef}
@@ -958,8 +962,8 @@ const HandwritingTemplateGenerator = () => {
             viewBox={`0 0 ${CURRENT_WIDTH} ${CURRENT_HEIGHT}`}
             className="practice-sheet-text"
           >
-            {/* Page background with border */}
-            <rect width={CURRENT_WIDTH} height={CURRENT_HEIGHT} fill="white" stroke="#000" strokeWidth="0.5"/>
+            {/* Page background */}
+            <rect width={CURRENT_WIDTH} height={CURRENT_HEIGHT} fill="white" />
             
             {/* Margin guides - more visible */}
             <g opacity="0.6">
